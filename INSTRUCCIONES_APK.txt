@@ -1,0 +1,114 @@
+================================================================================
+INSTRUCCIONES PARA COMPILAR LA APK CON ANTIGRAVITY (NUEVA PC)
+================================================================================
+
+Este archivo contiene la información del proyecto y las instrucciones detalladas paso a paso para que un agente de Antigravity en otra PC pueda compilar la APK de forma automática y dar exactamente el resultado deseado.
+
+--------------------------------------------------------------------------------
+INSTRUCCIONES DE INICIO PARA EL USUARIO:
+--------------------------------------------------------------------------------
+1. Copia toda la carpeta del proyecto ("Finances expenses") a la nueva PC.
+2. Abre Antigravity en esa carpeta en la nueva PC.
+3. Copia y pega el siguiente mensaje exacto en el chat de Antigravity:
+
+"Por favor, lee el archivo 'INSTRUCCIONES_APK.txt' que está en la raíz de este directorio. Sigue al pie de la letra todas las instrucciones y comandos detallados para configurar Apache Cordova, ajustar los archivos del frontend y compilar la APK de Android para que apunte a la IP de mi PC backend."
+
+--------------------------------------------------------------------------------
+INSTRUCCIONES TÉCNICAS PARA EL AGENTE DE ANTIGRAVITY (NUEVA PC):
+--------------------------------------------------------------------------------
+
+Hola, Agente de Antigravity. Tu tarea es compilar una APK de Android utilizando Apache Cordova para el proyecto "Finances expenses". Para lograrlo con éxito y asegurar que funcione de manera idéntica al entorno actual, debes seguir estos pasos:
+
+### PASO 1: VERIFICAR REQUISITOS PREVIOS EN LA NUEVA PC
+Antes de ejecutar los comandos de Cordova, asegúrate de que la PC tenga instalados y configurados los siguientes elementos:
+1. **Node.js y npm**: Ejecuta `node -v` y `npm -v` para verificar.
+2. **Java JDK 11 o superior**: Verifica que la variable de entorno `JAVA_HOME` esté configurada apuntando al directorio del JDK.
+3. **Android Studio y Android SDK**: Asegúrate de tener las herramientas de construcción (build tools) instaladas.
+4. **Gradle**: Asegúrate de que `gradle -v` responda correctamente y que Gradle esté en el PATH del sistema.
+
+Si todo está listo, instala Apache Cordova globalmente si aún no lo está:
+`npm install -g cordova`
+
+---
+
+### PASO 2: SOLICITAR LA IP DEL SERVIDOR AL USUARIO
+El backend de esta aplicación se ejecuta mediante FastAPI en la PC original o en un servidor local. Como la APK se ejecutará en un teléfono Android, las llamadas relativas (`/api/...`) fallarán porque el teléfono intentará buscar el backend en sí mismo (localhost).
+
+**Acción del Agente**: 
+Pregúntale al usuario cuál es la dirección IP local de la PC que ejecuta el backend (por ejemplo, `http://192.168.1.50:8000`).
+*Nota: Si el usuario no la sabe, pídele que ejecute `ipconfig` en la terminal de la PC donde corre el backend (`main.py`) para identificar su IP IPv4.*
+
+---
+
+### PASO 3: CREAR EL PROYECTO CORDOVA
+En el directorio de trabajo, ejecuta los siguientes comandos para inicializar un contenedor Cordova limpio:
+
+1. Crea el proyecto Cordova con el nombre de paquete y app adecuados:
+   `cordova create expense-tracker-app com.expensetracker.app ExpenseTracker`
+
+2. Entra al directorio del proyecto creado:
+   `cd expense-tracker-app`
+
+3. Añade la plataforma de Android:
+   `cordova platform add android`
+
+---
+
+### PASO 4: COPIAR Y AJUSTAR LOS ARCHIVOS DEL FRONTEND (www/)
+Cordova ejecuta los archivos HTML, JS y CSS que se encuentran en su subdirectorio `www/`. Debes transferir y adaptar el frontend:
+
+1. Borra todo el contenido por defecto dentro de `expense-tracker-app/www/`.
+2. Copia todos los archivos dentro de la carpeta `static/` del proyecto original (`index.html`, `app.js`, `styles.css`) y pégalos directamente en `expense-tracker-app/www/`.
+
+3. **Modificar Rutas de Recursos en `www/index.html`**:
+   Dado que en Cordova todos los recursos están al mismo nivel dentro de `www`, debes cambiar las rutas absolutas por relativas.
+   * Abre `expense-tracker-app/www/index.html`
+   * Busca la línea:
+     `<link rel="stylesheet" href="/static/styles.css">`
+     Y cámbiala por:
+     `<link rel="stylesheet" href="styles.css">`
+   * Busca la línea:
+     `<script src="/static/app.js"></script>`
+     Y cámbiala por:
+     `<script src="app.js"></script>`
+
+4. **Modificar IP del Backend en `www/app.js`**:
+   * Abre `expense-tracker-app/www/app.js`
+   * Busca la variable `API_BASE` en las primeras líneas:
+     `const API_BASE = "";`
+   * Reemplázala con la IP del servidor que te proporcionó el usuario. Ejemplo:
+     `const API_BASE = "http://192.168.1.50:8000";` (Asegúrate de incluir el protocolo http:// y el puerto 8000).
+
+---
+
+### PASO 5: AJUSTAR CONFIGURACIÓN DE SEGURIDAD DE RED EN ANDROID (Opcional pero recomendado)
+Si el backend corre en HTTP (sin SSL) en la red local, Android bloqueará las peticiones de forma predeterminada por políticas de tráfico claro.
+1. Abre `expense-tracker-app/config.xml` y asegúrate de que el acceso a URLs externas esté habilitado. Debería contener:
+   `<access origin="*" />`
+   `<allow-navigation href="http://*/*" />`
+   `<allow-navigation href="https://*/*" />`
+2. Si es necesario habilitar tráfico claro en Android (Cleartext Traffic), puedes guiar al usuario para añadir el plugin de Cordova de red o modificar el manifest de Android generado en:
+   `platforms/android/app/src/main/AndroidManifest.xml`
+   Asegurando que la etiqueta `<application>` contenga:
+   `android:usesCleartextTraffic="true"`
+
+---
+
+### PASO 6: COMPILAR LA APK
+Una vez ajustados los archivos en `www/`, compila el proyecto ejecutando el siguiente comando desde el directorio `expense-tracker-app`:
+`cordova build android`
+
+Si se requiere compilar directamente para producción o pruebas en dispositivo:
+`cordova build android --device`
+
+El archivo APK compilado final se generará en la siguiente ruta:
+`expense-tracker-app/platforms/android/app/build/outputs/apk/debug/app-debug.apk`
+
+---
+
+### PASO 7: ENTREGAR LA APK AL USUARIO
+Muestra la ruta exacta donde se generó el archivo APK y dale instrucciones al usuario para que se lo envíe a su teléfono Android e instale la aplicación.
+
+================================================================================
+FIN DE LAS INSTRUCCIONES
+================================================================================
