@@ -71,7 +71,17 @@ def seed_accounts():
 
 seed_accounts()
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="Expense Tracker API V3")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
